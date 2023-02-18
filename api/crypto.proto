@@ -1,0 +1,7 @@
+syntax = "proto3";
+
+package crypto;
+
+// The Crypto service definition.
+service Crypto {
+}
