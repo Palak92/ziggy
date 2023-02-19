@@ -1,0 +1,4 @@
+**/bazel-bin
+**/bazel-ziggy
+**/bazel-out
+**/bazel-testlogs

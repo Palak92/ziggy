@@ -2,6 +2,14 @@ syntax = "proto3";
 
 package crypto;
 
-// The Crypto service definition.
 service Crypto {
-}
+    rpc GetPrice(GetPriceRequest) returns (GetPriceResponse) {}
+  }
+  
+  message GetPriceRequest {
+    string symbol = 1;
+  }
+  
+  message GetPriceResponse {
+    double price = 1;
+  }
