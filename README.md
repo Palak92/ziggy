@@ -23,3 +23,16 @@ $ go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.2
 $ export PATH="$PATH:$(go env GOPATH)/bin"
 
 ```
+
+5. Install grpc curl to interact with server 
+
+```
+brew install grpcurl
+```
+
+### Send requests 
+
+```
+grpcurl -plaintext -format text -d 'symbol: "gRPCurl"' \
+  localhost:5000 crypto.Crypto.GetPrice
+```
