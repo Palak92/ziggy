@@ -3,13 +3,24 @@ syntax = "proto3";
 package crypto;
 
 service Crypto {
-    rpc GetPrice(GetPriceRequest) returns (GetPriceResponse) {}
+    rpc GetCoinInformation(GetCoinInformationRequest) returns (GetCoinInformationResponse) {}
+    //rpc GetCoinHistory(GetCoinInformationRequest) returns (GetCoinInformationResponse) {}
+    //rpc UpdateCoinTracking(GetCoinInformationRequest) returns (GetCoinInformationResponse) {}
   }
   
-  message GetPriceRequest {
-    string symbol = 1;
+  message GetCoinInformationRequest {
+    repeated string coin_names = 1;
   }
   
-  message GetPriceResponse {
-    double price = 1;
+  message GetCoinInformationResponse {
+    repeated Coin coins = 1;
+  }
+
+  message Coin{
+    string id =1;
+    string name =2;
+    string symbol = 3;
+    bool tracked = 4;
+    string price = 5;
+    string last_synced = 7; //UTC format
   }
