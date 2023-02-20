@@ -1,4 +1,4 @@
-module github.com/bazelbuild/rules_go
+module github.com/palak92/ziggy
 
 go 1.19
 

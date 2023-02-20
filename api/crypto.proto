@@ -3,16 +3,16 @@ syntax = "proto3";
 package crypto;
 
 service Crypto {
-    rpc GetCoinInformation(GetCoinInformationRequest) returns (GetCoinInformationResponse) {}
-    //rpc GetCoinHistory(GetCoinInformationRequest) returns (GetCoinInformationResponse) {}
-    //rpc UpdateCoinTracking(GetCoinInformationRequest) returns (GetCoinInformationResponse) {}
+    rpc ListCoins(ListCoinsRequest) returns (ListCoinsResponse) {}
+    rpc GetCoinHistory(GetCoinHistoryRequest) returns (GetCoinHistoryResponse) {}
+    rpc TrackCoin(TrackCoinRequest) returns (TrackCoinResponse) {}
   }
   
-  message GetCoinInformationRequest {
+  message ListCoinsRequest {
     repeated string coin_names = 1;
   }
   
-  message GetCoinInformationResponse {
+  message ListCoinsResponse {
     repeated Coin coins = 1;
   }
 
@@ -24,3 +24,38 @@ service Crypto {
     string price = 5;
     string last_synced = 7; //UTC format
   }
+
+  message GetCoinHistoryRequest {
+   string coin_id = 1;
+   int32 historical_data_points = 2;
+   SortDirection sort_direction = 3;
+
+   enum SortDirection {
+    SORT_DIRECTION_UNSPECIFIED = 0;
+    DESCENDING =1;
+    ASCENDING = 2;
+   }  
+  }
+
+  message GetCoinHistoryResponse{
+    repeated DataPoint data_points = 1;
+  }
+
+  // DataPoint is coin history data points.
+  message DataPoint{
+      string name = 1;
+      string id = 2;
+      string price = 3;
+      string synced_on = 4; //UTC format
+  }
+
+  message TrackCoinRequest{
+    string coin_id = 1;
+    bool enable_tracking = 2;
+  }
+
+  message TrackCoinResponse{
+    string message = 1;
+  }
+
+ 

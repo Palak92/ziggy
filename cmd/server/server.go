@@ -4,8 +4,8 @@ import (
 	"log"
 	"net"
 
-	pb "github.com/bazelbuild/rules_go/bazel-bin/api/crypto_go_proto_/github.com/palak92/ziggy/api"
-	"github.com/bazelbuild/rules_go/bazel-ziggy/pkg/server"
+	pb "github.com/palak92/ziggy/bazel-bin/api/crypto_go_proto_/github.com/palak92/ziggy/api"
+	"github.com/palak92/ziggy/pkg/server"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
