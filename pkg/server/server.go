@@ -20,7 +20,7 @@ func (c *Crypto) ListCoins(ctx context.Context, req *pb.ListCoinsRequest) (*pb.L
 	}
 	for _, crypto := range list.CryptoMarket {
 		coin := pb.Coin{
-			Id:         string(crypto.ID),
+			Id:         fmt.Sprint(crypto.ID),
 			Name:       crypto.Name,
 			Symbol:     crypto.Symbol,
 			Tracked:    false,
@@ -37,8 +37,26 @@ func (c *Crypto) ListCoins(ctx context.Context, req *pb.ListCoinsRequest) (*pb.L
 }
 
 func (c *Crypto) GetCoinHistory(ctx context.Context, req *pb.GetCoinHistoryRequest) (*pb.GetCoinHistoryResponse, error) {
-	res := &pb.GetCoinHistoryResponse{}
-	return res, nil
+	qs, err := coinmarketcap.GetHistoricalQuotes("21971", 10, "asc")
+	if err != nil {
+		return nil, fmt.Errorf("error while getting list from coinmarketcap:%w", err)
+	}
+
+	dps := []*pb.DataPoint{}
+
+	for _, q := range qs.HistoricalQuote["21971"].Quotes {
+		dp := pb.DataPoint{
+			Name:     qs.HistoricalQuote["21971"].Name,
+			Id:       fmt.Sprint(qs.HistoricalQuote["21971"].ID),
+			Price:    fmt.Sprint(q.Quote["USD"].Price),
+			SyncedOn: q.Timestamp,
+		}
+
+		dps = append(dps, &dp)
+	}
+	return &pb.GetCoinHistoryResponse{
+		DataPoints: dps,
+	}, nil
 }
 
 func (c *Crypto) TrackCoin(ctx context.Context, req *pb.TrackCoinRequest) (*pb.TrackCoinResponse, error) {
