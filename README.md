@@ -37,7 +37,12 @@ bazel build //api:all
 ```
 brew install grpcurl
 ```
-2. Send requests to grpc server.
+2. Run GRPC server
+```
+bazel run //cmd/server:server
+```
+
+3. Send requests to grpc server.
 ```
 grpcurl -plaintext -format text -d 'symbol: "gRPCurl"' \
   localhost:5000 crypto.Crypto.GetPrice

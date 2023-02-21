@@ -12,8 +12,8 @@ go_library(
     importpath = "github.com/palak92/ziggy/cmd/server",
     visibility = ["//visibility:private"],
     deps = [
-        "@io_bazel_rules_go//bazel-bin/api/crypto_go_proto_/github.com/palak92/ziggy/api:go_default_library",
-        "@io_bazel_rules_go//pkg/server:go_default_library",
+        "//api",
+        "//pkg/server",
         "@org_golang_google_grpc//:go_default_library",
         "@org_golang_google_grpc//reflection",
     ],
