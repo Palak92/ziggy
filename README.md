@@ -80,13 +80,34 @@ bazel run //cmd/server:server
 ```
 
 3. Send requests to grpc server.
+
+### Method A
+
 ```
-grpcurl -plaintext -format text -d 'symbol: "gRPCurl"' \
+grpcurl -plaintext -format text \
   localhost:5000 crypto.Crypto.ListCoins
 ```
 
+```
+grpcurl \
+  -d '{"coin_names": "cnt0azqenne"}' \
+  -plaintext localhost:5000 crypto.Crypto.ListCoins
+```
+
+```
+grpcurl \
+  -d '{"coin_names": ["cnt0azqenne","68t3scz64ja"]}' \
+   -plaintext localhost:5000 crypto.Crypto.ListCoins
+```
+### Method C
+```
+grpcurl \
+  -d '{"coin_id": "2252",
+       "enableTracking": true}' \
+   -plaintext localhost:5000 crypto.Crypto.TrackCoin
+```
 ## Known issues 
-1. Initally more than 5 coins are added to database as CoinMarketPlace API gives 10 coins even when there is limit of 5.
+1. Initially more than 5 coins are added to database as CoinMarketPlace API gives 10 coins even when there is limit of 5.
 
 ## Dev
 
@@ -99,3 +120,8 @@ grpcurl -plaintext -format text -d 'symbol: "gRPCurl"' \
 curl -H "X-CMC_PRO_API_KEY: 0b424217-a625-470d-8d51-d1a344bac7d2" -H "Accept: application/json" -d "start=1&limit=5&convert=USD" -G https://sandbox-api.coinmarketcap.com/v1/cryptocurrency/listings/latest | jq
 ```
 
+## Improvements 
+1. Use two database tables, one for storing coins and other for storing history of prices of the coins.
+2. Create unit tests for all go files.
+3. Have e2e test to check if the API is working with mysql.
+4. Use in-build  proto validators to check requests.  

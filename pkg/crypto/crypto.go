@@ -14,13 +14,26 @@ type Server struct {
 	DB *db.CoinsDB
 }
 
-func (c *Server) ListCoins(ctx context.Context, req *pb.ListCoinsRequest) (*pb.ListCoinsResponse, error) {
-	coins := []*pb.Coin{}
-	coinsData, err := c.DB.AllCoins()
-	if err != nil {
-		return nil, fmt.Errorf("error while getting coins from database:%w", err)
+func (s *Server) ListCoins(ctx context.Context, req *pb.ListCoinsRequest) (*pb.ListCoinsResponse, error) {
+	cns := req.CoinNames
+
+	var cd []*db.Coin
+	if len(cns) == 0 {
+		coinsData, err := s.allCoinsFromDB()
+		if err != nil {
+			return nil, fmt.Errorf("error while getting all coins from db: %w", err)
+		}
+		cd = coinsData
+	} else {
+		coinsData, err := s.coinsByNames(cns)
+		if err != nil {
+			return nil, fmt.Errorf("error while getting coins from db of names%v: %w", cns, err)
+		}
+		cd = coinsData
 	}
-	for _, c := range coinsData {
+
+	coins := []*pb.Coin{}
+	for _, c := range cd {
 		coin := pb.Coin{
 			Id:         fmt.Sprint(c.UnvID),
 			Name:       c.Name,
@@ -29,7 +42,7 @@ func (c *Server) ListCoins(ctx context.Context, req *pb.ListCoinsRequest) (*pb.L
 			Price:      c.Price,
 			LastSynced: c.LastSynced,
 		}
-
+		fmt.Printf("tracked value is %v", c.Tracked)
 		coins = append(coins, &coin)
 	}
 	res := &pb.ListCoinsResponse{
@@ -38,7 +51,27 @@ func (c *Server) ListCoins(ctx context.Context, req *pb.ListCoinsRequest) (*pb.L
 	return res, nil
 }
 
-func (c *Server) GetCoinHistory(ctx context.Context, req *pb.GetCoinHistoryRequest) (*pb.GetCoinHistoryResponse, error) {
+func (c *Server) allCoinsFromDB() ([]*db.Coin, error) {
+	coinsData, err := c.DB.AllCoins()
+	if err != nil {
+		return nil, fmt.Errorf("error while getting coins from database:%w", err)
+	}
+	return coinsData, nil
+}
+
+func (s *Server) coinsByNames(names []string) ([]*db.Coin, error) {
+	var coins []*db.Coin
+	for _, n := range names {
+		c, err := s.DB.CoinsByName(n)
+		if err != nil {
+			return nil, fmt.Errorf("error while getting coin of name %q from database:%w", n, err)
+		}
+		coins = append(coins, c)
+	}
+
+	return coins, nil
+}
+func (s *Server) GetCoinHistory(ctx context.Context, req *pb.GetCoinHistoryRequest) (*pb.GetCoinHistoryResponse, error) {
 	qs, err := coinmarketcap.GetHistoricalQuotes("21971", 10, "asc")
 	if err != nil {
 		return nil, fmt.Errorf("error while getting list from coinmarketcap:%w", err)
@@ -61,7 +94,17 @@ func (c *Server) GetCoinHistory(ctx context.Context, req *pb.GetCoinHistoryReque
 	}, nil
 }
 
-func (c *Server) TrackCoin(ctx context.Context, req *pb.TrackCoinRequest) (*pb.TrackCoinResponse, error) {
-	res := &pb.TrackCoinResponse{}
+func (s *Server) TrackCoin(ctx context.Context, req *pb.TrackCoinRequest) (*pb.TrackCoinResponse, error) {
+	if len(req.CoinId) == 0 {
+		return nil, fmt.Errorf("coin ID is not present in request %v", req)
+	}
+	err := s.DB.TrackCoin(req.CoinId, req.EnableTracking)
+	if err != nil {
+		return nil, fmt.Errorf("err while updating %v tracking for coin id %q", req.EnableTracking, req.CoinId)
+	}
+
+	res := &pb.TrackCoinResponse{
+		Message: "Ok",
+	}
 	return res, nil
 }
