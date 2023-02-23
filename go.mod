@@ -8,6 +8,7 @@ require (
 	github.com/bazelbuild/bazel-gazelle v0.29.0 // indirect
 	github.com/bazelbuild/buildtools v0.0.0-20230111132423-06e8e2436a75 // indirect
 	github.com/bmatcuk/doublestar/v4 v4.6.0 // indirect
+	github.com/go-sql-driver/mysql v1.7.0
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/pelletier/go-toml v1.9.5 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect

@@ -41,7 +41,6 @@ go_image(
         "@org_golang_google_grpc//:go_default_library",
         "@org_golang_google_grpc//reflection",
     ],
-    
 )
 
 container_image(

@@ -29,7 +29,16 @@ $ export PATH="$PATH:$(go env GOPATH)/bin"
 ```
 bazel build //api:all
 ```
+6. Create BUILD files
 
+```
+bazel run //:gazelle
+```
+
+7. Build 
+```
+bazel build //...
+```
 
 ### Send requests 
 1. Install grpc curl to interact with server 

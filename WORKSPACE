@@ -20,7 +20,6 @@ http_archive(
 load("@io_bazel_rules_go//go:deps.bzl", "go_register_toolchains", "go_rules_dependencies")
 load("@bazel_gazelle//:deps.bzl", "gazelle_dependencies", "go_repository")
 
-
 # Declare Go direct dependencies.
 go_repository(
     name = "org_golang_x_net",
@@ -43,6 +42,13 @@ go_repository(
     importpath = "golang.org/x/text",
     sum = "h1:g61tztE5qeGQ89tm6NTjjM9VPIm088od1l6aSorWRWg=",
     version = "v0.3.0",
+)
+
+go_repository(
+    name = "com_github_go_sql_driver_mysql",
+    importpath = "github.com/go-sql-driver/mysql",
+    sum = "h1:ueSltNNllEqE3qcWBTD0iQd3IpL/6U+mJxLkazJ7YPc=",
+    version = "v1.7.0",
 )
 
 # Declare indirect dependencies and register toolchains.
@@ -74,8 +80,8 @@ http_archive(
     strip_prefix = "rules_docker-0.24.0",
     urls = ["https://github.com/bazelbuild/rules_docker/releases/download/v0.24.0/rules_docker-v0.24.0.tar.gz"],
 )
-load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 load(
     "@io_bazel_rules_docker//repositories:repositories.bzl",
     container_repositories = "repositories",
