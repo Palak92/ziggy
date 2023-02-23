@@ -1,6 +1,4 @@
 load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
-load("@io_bazel_rules_docker//go:image.bzl", "go_image")
-load("@io_bazel_rules_docker//container:container.bzl", "container_image")
 
 go_binary(
     name = "server",
@@ -15,35 +13,9 @@ go_library(
     visibility = ["//visibility:private"],
     deps = [
         "//api",
-        "//pkg/server",
+        "//pkg/crypto",
+        "//pkg/db",
         "@org_golang_google_grpc//:go_default_library",
         "@org_golang_google_grpc//reflection",
     ],
-)
-
-go_image(
-    name = "hello_go_image",
-    embed = [":server_lib"],
-    goarch = "amd64",
-    goos = "linux",
-    pure = "on",
-)
-
-go_image(
-    name = "go_image",
-    srcs = ["server.go"],
-    goarch = "amd64",
-    goos = "linux",
-    pure = "on",
-    deps = [
-        "//api",
-        "//pkg/server",
-        "@org_golang_google_grpc//:go_default_library",
-        "@org_golang_google_grpc//reflection",
-    ],
-)
-
-container_image(
-    name = "docker",
-    base = ":hello_go_image",
 )

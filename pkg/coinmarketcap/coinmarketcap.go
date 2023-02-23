@@ -52,7 +52,7 @@ type V2Quote struct {
 //
 //	src: https://sandbox-api.coinmarketcap.com/v1/cryptocurrency/listings/latest
 //	doc: https://pro.coinmarketcap.com/api/v1#operation/getV1CryptocurrencyListingsLatest
-func ListCoins() (*CryptoMarketList, error) {
+func ListCoins(count int) (*CryptoMarketList, error) {
 	client := &http.Client{}
 	req, err := http.NewRequest("GET", "https://sandbox-api.coinmarketcap.com/v1/cryptocurrency/listings/latest", nil)
 	if err != nil {
@@ -61,7 +61,7 @@ func ListCoins() (*CryptoMarketList, error) {
 
 	q := url.Values{}
 	q.Add("start", "1")
-	q.Add("limit", "5")
+	q.Add("limit", fmt.Sprint(count))
 	q.Add("convert", "USD")
 	q.Add("cryptocurrency_type", "coins")
 	q.Add("sort_dir", "asc")

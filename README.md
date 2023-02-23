@@ -1,7 +1,7 @@
 # ziggy
 RPC API service  to serve up Crypto price information.
 
-## Prerequites (MacOs)
+## Prerequisites (MacOs)
 1. Install go
 2. Intall protobuf
 
@@ -40,7 +40,35 @@ bazel run //:gazelle
 bazel build //...
 ```
 
-### Send requests 
+## Set up database
+
+1. Install mysql 
+2. Connect to mysql server 
+```
+mysql -u root -p
+```
+3. Create `coins` database
+```
+create database coins;
+```
+4. Switch to `coins` database
+
+```
+use coins;
+```
+5. Create `coins` table in `coins` database
+
+```
+source /path/to/ziggy/folder/database/create-table.sql
+```
+
+6. Check if table is created.
+```
+mysql> select * from coins;
+```
+should have schema of table `coins`.
+
+## Send requests 
 1. Install grpc curl to interact with server 
 
 ```
@@ -54,5 +82,20 @@ bazel run //cmd/server:server
 3. Send requests to grpc server.
 ```
 grpcurl -plaintext -format text -d 'symbol: "gRPCurl"' \
-  localhost:5000 crypto.Crypto.GetPrice
+  localhost:5000 crypto.Crypto.ListCoins
 ```
+
+## Known issues 
+1. Initally more than 5 coins are added to database as CoinMarketPlace API gives 10 coins even when there is limit of 5.
+
+## Dev
+
+### Testing coinmarketplace API
+
+1. API definitions are present [here](https://pro.coinmarketcap.com/api/v1#operation/getV1CryptocurrencyListingsLatest)
+
+2. Curl to get 
+```
+curl -H "X-CMC_PRO_API_KEY: 0b424217-a625-470d-8d51-d1a344bac7d2" -H "Accept: application/json" -d "start=1&limit=5&convert=USD" -G https://sandbox-api.coinmarketcap.com/v1/cryptocurrency/listings/latest | jq
+```
+

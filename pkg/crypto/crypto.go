@@ -1,4 +1,4 @@
-package server
+package crypto
 
 import (
 	"context"
@@ -6,26 +6,28 @@ import (
 
 	pb "github.com/palak92/ziggy/api"
 	"github.com/palak92/ziggy/pkg/coinmarketcap"
+	"github.com/palak92/ziggy/pkg/db"
 )
 
-type Crypto struct {
+type Server struct {
 	pb.UnimplementedCryptoServer
+	DB *db.CoinsDB
 }
 
-func (c *Crypto) ListCoins(ctx context.Context, req *pb.ListCoinsRequest) (*pb.ListCoinsResponse, error) {
+func (c *Server) ListCoins(ctx context.Context, req *pb.ListCoinsRequest) (*pb.ListCoinsResponse, error) {
 	coins := []*pb.Coin{}
-	list, err := coinmarketcap.ListCoins()
+	coinsData, err := c.DB.AllCoins()
 	if err != nil {
-		return nil, fmt.Errorf("error while getting list from coinmarketcap:%w", err)
+		return nil, fmt.Errorf("error while getting coins from database:%w", err)
 	}
-	for _, crypto := range list.CryptoMarket {
+	for _, c := range coinsData {
 		coin := pb.Coin{
-			Id:         fmt.Sprint(crypto.ID),
-			Name:       crypto.Name,
-			Symbol:     crypto.Symbol,
-			Tracked:    false,
-			Price:      fmt.Sprint(crypto.Quote["USD"].Price),
-			LastSynced: crypto.LastUpdated,
+			Id:         fmt.Sprint(c.UnvID),
+			Name:       c.Name,
+			Symbol:     c.Symbol,
+			Tracked:    c.Tracked,
+			Price:      c.Price,
+			LastSynced: c.LastSynced,
 		}
 
 		coins = append(coins, &coin)
@@ -36,7 +38,7 @@ func (c *Crypto) ListCoins(ctx context.Context, req *pb.ListCoinsRequest) (*pb.L
 	return res, nil
 }
 
-func (c *Crypto) GetCoinHistory(ctx context.Context, req *pb.GetCoinHistoryRequest) (*pb.GetCoinHistoryResponse, error) {
+func (c *Server) GetCoinHistory(ctx context.Context, req *pb.GetCoinHistoryRequest) (*pb.GetCoinHistoryResponse, error) {
 	qs, err := coinmarketcap.GetHistoricalQuotes("21971", 10, "asc")
 	if err != nil {
 		return nil, fmt.Errorf("error while getting list from coinmarketcap:%w", err)
@@ -59,7 +61,7 @@ func (c *Crypto) GetCoinHistory(ctx context.Context, req *pb.GetCoinHistoryReque
 	}, nil
 }
 
-func (c *Crypto) TrackCoin(ctx context.Context, req *pb.TrackCoinRequest) (*pb.TrackCoinResponse, error) {
+func (c *Server) TrackCoin(ctx context.Context, req *pb.TrackCoinRequest) (*pb.TrackCoinResponse, error) {
 	res := &pb.TrackCoinResponse{}
 	return res, nil
 }
