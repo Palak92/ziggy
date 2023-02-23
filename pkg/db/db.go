@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"sort"
 
 	"github.com/go-sql-driver/mysql"
 	"github.com/palak92/ziggy/pkg/coinmarketcap"
@@ -29,7 +30,6 @@ func New(user, password, address string) (*CoinsDB, error) {
 	if err != nil {
 		return nil, fmt.Errorf("err while opening mysql %v", err)
 	}
-	defer db.Close()
 
 	err = db.Ping()
 	if err != nil {
@@ -46,7 +46,34 @@ func New(user, password, address string) (*CoinsDB, error) {
 	return cDB, nil
 }
 
+func (c *CoinsDB) Close() {
+	c.DB.Close()
+}
+func (c *CoinsDB) deleteAllCoins() error {
+	// Prepare a DELETE statement to remove all rows from the table
+	stmt, err := c.DB.Prepare("DELETE FROM coins")
+	if err != nil {
+		return fmt.Errorf("error while preparing statement: %w", err)
+	}
+	defer stmt.Close()
+
+	// Execute the statement to remove all rows from the table
+	_, err = stmt.Exec()
+	if err != nil {
+		return fmt.Errorf("error while executing statement: %w", err)
+	}
+
+	log.Default().Println("All rows removed from table.")
+	return nil
+}
+
 func (c *CoinsDB) initData() error {
+	// clean database
+	err := c.deleteAllCoins()
+	if err != nil {
+		return fmt.Errorf("error while deleting all rows of coins table:%w", err)
+	}
+
 	list, err := coinmarketcap.ListCoins(5)
 	if err != nil {
 		return fmt.Errorf("error while getting list from coinmarketcap:%w", err)
@@ -92,11 +119,11 @@ func (c *CoinsDB) addCoins(coin *Coin) error {
 	return nil
 }
 
-func (c *CoinsDB) AllCoins() ([]Coin, error) {
+func (c *CoinsDB) AllCoins() ([]*Coin, error) {
 	// An coins slice to hold data from returned rows.
-	var coins []Coin
+	var coins []*Coin
 
-	rows, err := c.DB.Query("SELECT * FROM coins = ?")
+	rows, err := c.DB.Query("SELECT * FROM coins")
 	if err != nil {
 		return nil, fmt.Errorf("err while querying all coins: %w", err)
 	}
@@ -104,13 +131,51 @@ func (c *CoinsDB) AllCoins() ([]Coin, error) {
 	// Loop through rows, using Scan to assign column data to struct fields.
 	for rows.Next() {
 		var coin Coin
-		if err := rows.Scan(&coin.ID, &coin.UnvID, &coin.Name, &coin.Symbol, &coin.Price, &coin.LastSynced, &coin.Tracked); err != nil {
+		if err := rows.Scan(&coin.ID, &coin.UnvID, &coin.Name, &coin.Symbol, &coin.Tracked, &coin.Price, &coin.LastSynced); err != nil {
 			return nil, fmt.Errorf("err while scanning coin from query: %w", err)
 		}
-		coins = append(coins, coin)
+		coins = append(coins, &coin)
 	}
 	if err := rows.Err(); err != nil {
 		return nil, fmt.Errorf("err from rows received from query: %w", err)
 	}
 	return coins, nil
+}
+
+// CoinsByName queries for coins that have the specified  name.
+func (c *CoinsDB) CoinsByName(name string) (*Coin, error) {
+	var coins []*Coin
+
+	rows, err := c.DB.Query("SELECT * FROM coins WHERE name = ?", name)
+	if err != nil {
+		return nil, fmt.Errorf("while running query to get coins by name %q: %v", name, err)
+	}
+	defer rows.Close()
+	// Loop through rows, using Scan to assign column data to struct fields.
+	for rows.Next() {
+		var coin Coin
+		if err := rows.Scan(&coin.ID, &coin.UnvID, &coin.Name, &coin.Symbol, &coin.Tracked, &coin.Price, &coin.LastSynced); err != nil {
+			return nil, fmt.Errorf("err while scanning coin from query: %w", err)
+		}
+		coins = append(coins, &coin)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("err from rows received from query: %w", err)
+	}
+
+	coins = sortCoins(coins, "dcs")
+
+	return coins[0], nil
+}
+
+func sortCoins(coins []*Coin, order string) []*Coin {
+	if order == "asc" {
+		sort.Slice(coins, func(i, j int) bool {
+			return coins[i].LastSynced > coins[j].LastSynced
+		})
+	}
+	sort.Slice(coins, func(i, j int) bool {
+		return coins[i].LastSynced < coins[j].LastSynced
+	})
+	return coins
 }

@@ -23,6 +23,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("failed to connect to database : %v", err)
 	}
+	defer db.Close()
 
 	lis, err := net.Listen("tcp", ":5000")
 	if err != nil {
