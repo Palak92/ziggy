@@ -81,31 +81,11 @@ bazel run //cmd/server:server
 
 3. Send requests to grpc server.
 
-### Method A
-
 ```
 grpcurl -plaintext -format text \
   localhost:5000 crypto.Crypto.ListCoins
 ```
 
-```
-grpcurl \
-  -d '{"coin_names": "cnt0azqenne"}' \
-  -plaintext localhost:5000 crypto.Crypto.ListCoins
-```
-
-```
-grpcurl \
-  -d '{"coin_names": ["cnt0azqenne","68t3scz64ja"]}' \
-   -plaintext localhost:5000 crypto.Crypto.ListCoins
-```
-### Method C
-```
-grpcurl \
-  -d '{"coin_id": "2252",
-       "enableTracking": true}' \
-   -plaintext localhost:5000 crypto.Crypto.TrackCoin
-```
 ## Known issues 
 1. Initially more than 5 coins are added to database as CoinMarketPlace API gives 10 coins even when there is limit of 5.
 
