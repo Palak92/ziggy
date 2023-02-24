@@ -42,7 +42,6 @@ func (s *Server) ListCoins(ctx context.Context, req *pb.ListCoinsRequest) (*pb.L
 			Price:      c.Price,
 			LastSynced: c.LastSynced,
 		}
-		fmt.Printf("tracked value is %v", c.Tracked)
 		coins = append(coins, &coin)
 	}
 	res := &pb.ListCoinsResponse{
