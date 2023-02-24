@@ -168,7 +168,6 @@ func (c *CoinsDB) CoinsByName(name string) (*Coin, error) {
 	return coins[0], nil
 }
 
-<<<<<<< HEAD
 func (c *CoinsDB) TrackCoin(coinID string, track bool) error {
 	// Prepare the update statement
 	stmt, err := c.DB.Prepare("UPDATE coins SET tracked = ? WHERE coin_id = ?")
@@ -192,8 +191,6 @@ func (c *CoinsDB) TrackCoin(coinID string, track bool) error {
 	log.Default().Printf("Updated %d rows\n", rowsAffected)
 	return nil
 }
-=======
->>>>>>> ddfc02b41b64b9bfc6030c9b1d786fcfe0913a78
 func sortCoins(coins []*Coin, order string) []*Coin {
 	if order == "asc" {
 		sort.Slice(coins, func(i, j int) bool {
