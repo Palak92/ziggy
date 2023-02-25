@@ -95,6 +95,12 @@ grpcurl -plaintext -format text \
   -d '{"coin_names": "5fkh5xg058v"}' \
    -plaintext localhost:5000 crypto.Crypto.ListCoins
 ```
+### Method B
+```
+ grpcurl \
+  -d '{"coin_id": "21304"}' \
+   -plaintext localhost:5000 crypto.Crypto.GetCoinHistory
+```
 
 ### Method C
 ```
@@ -114,7 +120,7 @@ grpcurl -plaintext -format text \
 
 2. Curl to get 
 ```
-curl -H "X-CMC_PRO_API_KEY: 0b424217-a625-470d-8d51-d1a344bac7d2" -H "Accept: application/json" -d "start=1&limit=5&convert=USD" -G https://sandbox-api.coinmarketcap.com/v1/cryptocurrency/listings/latest | jq
+curl -H "X-CMC_PRO_API_KEY: 0b424217-a625-470d-8d51-d1a344bac7d2" -H "Accept: application/json" -d "start=1&limit=5&convert=USD" -G https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/new | jq
 
 ```
 ```
@@ -127,3 +133,5 @@ curl -H "X-CMC_PRO_API_KEY: 0b424217-a625-470d-8d51-d1a344bac7d2" -H "Accept: ap
 2. Create unit tests for all go files.
 3. Have e2e test to check if the API is working with mysql.
 4. Use in-build  proto validators to check requests.  
+5. Can use `https://pro.coinmarketcap.com/api/v1#operation/getV1CryptocurrencyTrendingLatest` to get coins at first.
+6. Method B should take request constraints 

@@ -83,7 +83,7 @@ func (c *CoinsDB) initData() error {
 			UnvID:      fmt.Sprint(crypto.ID),
 			Name:       crypto.Name,
 			Symbol:     crypto.Symbol,
-			Tracked:    true,
+			Tracked:    false,
 			Price:      fmt.Sprint(crypto.Quote["USD"].Price),
 			LastSynced: crypto.LastUpdated,
 		}
@@ -224,4 +224,28 @@ func (c *CoinsDB) GetTrackedCoinIDs() ([]string, error) {
 		return nil, fmt.Errorf("error while getting coin Ids: %w", err)
 	}
 	return coinIDs, nil
+}
+
+// direction should be ASC or DESC
+func (c *CoinsDB) GetCoinQuotes(coinID string) ([]*Coin, error) {
+	var coins []*Coin
+
+	rows, err := c.DB.Query(" SELECT * FROM coins WHERE coin_id=? ORDER BY last_synced DESC", coinID)
+	if err != nil {
+		return nil, fmt.Errorf("while running query to get quotes of coin id %q: %v", coinID, err)
+	}
+	defer rows.Close()
+	// Loop through rows, using Scan to assign column data to struct fields.
+	for rows.Next() {
+		var coin Coin
+		if err := rows.Scan(&coin.ID, &coin.UnvID, &coin.Name, &coin.Symbol, &coin.Tracked, &coin.Price, &coin.LastSynced); err != nil {
+			return nil, fmt.Errorf("err while scanning coin from query: %w", err)
+		}
+		coins = append(coins, &coin)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("err from rows received from query: %w", err)
+	}
+
+	return coins, nil
 }

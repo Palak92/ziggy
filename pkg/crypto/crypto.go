@@ -70,23 +70,26 @@ func (s *Server) coinsByNames(names []string) ([]*db.Coin, error) {
 	return coins, nil
 }
 func (s *Server) GetCoinHistory(ctx context.Context, req *pb.GetCoinHistoryRequest) (*pb.GetCoinHistoryResponse, error) {
-	// qs, err := coinmarketcap.GetHistoricalQuotes("21971", 10, "asc")
-	// if err != nil {
-	// 	return nil, fmt.Errorf("error while getting list from coinmarketcap:%w", err)
-	// }
+	if len(req.CoinId) == 0 {
+		return nil, fmt.Errorf("Coin id is not present in req %v", req)
+	}
+	cs, err := s.DB.GetCoinQuotes(req.CoinId)
+	if err != nil {
+		return nil, fmt.Errorf("err while getting coin quotes from db: %w", err)
 
+	}
 	dps := []*pb.DataPoint{}
 
-	// for _, q := range qs.Data["21971"].Quotes {
-	// 	dp := pb.DataPoint{
-	// 		Name:     qs.Data["21971"].Name,
-	// 		Id:       fmt.Sprint(qs.Data["21971"].ID),
-	// 		Price:    fmt.Sprint(q.Quote["USD"].Price),
-	// 		SyncedOn: q.Timestamp,
-	// 	}
+	for _, q := range cs {
+		dp := pb.DataPoint{
+			Name:     q.Name,
+			Id:       q.ID,
+			Price:    q.Price,
+			SyncedOn: q.LastSynced,
+		}
 
-	// 	dps = append(dps, &dp)
-	// }
+		dps = append(dps, &dp)
+	}
 	return &pb.GetCoinHistoryResponse{
 		DataPoints: dps,
 	}, nil
