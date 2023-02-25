@@ -7,6 +7,7 @@ import (
 	pb "github.com/palak92/ziggy/api"
 	"github.com/palak92/ziggy/pkg/crypto"
 	"github.com/palak92/ziggy/pkg/db"
+	"github.com/palak92/ziggy/pkg/tracker"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
@@ -36,6 +37,11 @@ func main() {
 	// Register reflection service on gRPC server.
 	reflection.Register(s)
 
+	// for collecting prices of coins which are tracked.
+	tracker := tracker.New(db)
+	tracker.Start()
+
+	defer tracker.Stop()
 	log.Printf("server listening at %v", lis.Addr())
 	if err := s.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %v", err)

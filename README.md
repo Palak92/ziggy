@@ -83,10 +83,19 @@ bazel run //cmd/server:server
 3. Send requests to grpc server.
 
 ### Method A
+#### All coins
 ```
 grpcurl -plaintext -format text \
   localhost:5000 crypto.Crypto.ListCoins
 ```
+
+#### Coins with particular name
+```
+ grpcurl \
+  -d '{"coin_names": "5fkh5xg058v"}' \
+   -plaintext localhost:5000 crypto.Crypto.ListCoins
+```
+
 ### Method C
 ```
  grpcurl \
@@ -106,6 +115,11 @@ grpcurl -plaintext -format text \
 2. Curl to get 
 ```
 curl -H "X-CMC_PRO_API_KEY: 0b424217-a625-470d-8d51-d1a344bac7d2" -H "Accept: application/json" -d "start=1&limit=5&convert=USD" -G https://sandbox-api.coinmarketcap.com/v1/cryptocurrency/listings/latest | jq
+
+```
+```
+curl -H "X-CMC_PRO_API_KEY: 0b424217-a625-470d-8d51-d1a344bac7d2" -H "Accept: application/json" -d "id=1" -G https://pro-api.coinmarketcap.com/v2/cryptocurrency/quotes/latest | jq
+
 ```
 
 ## Improvements 

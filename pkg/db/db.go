@@ -78,16 +78,16 @@ func (c *CoinsDB) initData() error {
 	if err != nil {
 		return fmt.Errorf("error while getting list from coinmarketcap:%w", err)
 	}
-	for _, crypto := range list.CryptoMarket {
+	for _, crypto := range list.Data {
 		coin := &Coin{
 			UnvID:      fmt.Sprint(crypto.ID),
 			Name:       crypto.Name,
 			Symbol:     crypto.Symbol,
-			Tracked:    false,
+			Tracked:    true,
 			Price:      fmt.Sprint(crypto.Quote["USD"].Price),
 			LastSynced: crypto.LastUpdated,
 		}
-		err = c.addCoins(coin)
+		err = c.InsertCoin(coin)
 		if err != nil {
 			return fmt.Errorf("error while adding coin in database:%w", err)
 		}
@@ -96,7 +96,7 @@ func (c *CoinsDB) initData() error {
 	return nil
 }
 
-func (c *CoinsDB) addCoins(coin *Coin) error {
+func (c *CoinsDB) InsertCoin(coin *Coin) error {
 	// Prepare the INSERT statement
 	stmt, err := c.DB.Prepare("INSERT INTO coins (coin_id, name, symbol, tracked,price, last_synced) VALUES (?, ?, ?,?,?,?)")
 	if err != nil {
@@ -201,4 +201,27 @@ func sortCoins(coins []*Coin, order string) []*Coin {
 		return coins[i].LastSynced < coins[j].LastSynced
 	})
 	return coins
+}
+
+func (c *CoinsDB) GetTrackedCoinIDs() ([]string, error) {
+	var coinIDs []string
+
+	rows, err := c.DB.Query("SELECT DISTINCT coin_id FROM coins where tracked = true")
+	if err != nil {
+		return nil, fmt.Errorf("error while querying unique coin Ids: %w", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var coinID string
+		if err := rows.Scan(&coinID); err != nil {
+			return nil, fmt.Errorf("error while scanning coin Id: %w", err)
+		}
+		coinIDs = append(coinIDs, coinID)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("error while getting coin Ids: %w", err)
+	}
+	return coinIDs, nil
 }

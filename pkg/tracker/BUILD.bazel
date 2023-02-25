@@ -1,12 +1,12 @@
 load("@io_bazel_rules_go//go:def.bzl", "go_library")
 
 go_library(
-    name = "crypto",
-    srcs = ["crypto.go"],
-    importpath = "github.com/palak92/ziggy/pkg/crypto",
+    name = "tracker",
+    srcs = ["tracker.go"],
+    importpath = "github.com/palak92/ziggy/pkg/tracker",
     visibility = ["//visibility:public"],
     deps = [
-        "//api",
+        "//pkg/coinmarketcap",
         "//pkg/db",
     ],
 )
